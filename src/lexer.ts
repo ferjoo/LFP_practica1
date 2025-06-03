@@ -64,7 +64,7 @@ export function lexer(input: string): LexerResult {
             break;
           }
           if (input[j] === '\n') {
-            break; // No permitir saltos de línea en string
+            break;
           }
           lexeme += input[j];
           j++;
@@ -127,9 +127,6 @@ export function lexer(input: string): LexerResult {
     i++;
     col++;
   }
-
-  // Verificar estructuras no cerradas (llaves, paréntesis, corchetes)
-  // (Opcional: puedes agregar lógica aquí si quieres)
 
   return { tokens, errors };
 } 
