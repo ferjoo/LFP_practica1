@@ -193,6 +193,66 @@
   flex-direction: row;
   gap: 24px;
   overflow-x: auto;
-  padding-bottom: 16px;
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
   flex-wrap: nowrap;
+}
+
+.pokemon-card-tcg {
+  flex: 0 0 320px;
+  width: 320px;
+  margin: 0;
+}
+
+.team-container {
+  width: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.team-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.trainer-title {
+  margin: 0;
+  color: #333;
+  font-size: 1.8rem;
+}
+
+.show-all-toggle {
+  width: 100%;
+  max-width: 400px;
+  margin: 0;
+  padding: 0.75rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.show-all-toggle label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.show-all-toggle input[type="checkbox"] {
+  width: 1.2rem;
+  height: 1.2rem;
+  cursor: pointer;
+  accent-color: #4DC3FF;
 } 

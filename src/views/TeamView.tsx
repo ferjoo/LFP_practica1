@@ -25,6 +25,8 @@ interface PokemonWithIVs extends Pokemon {
 export function TeamView() {
   const { editorText, analyzed, errors } = useApp();
   const [pokemonTeam, setPokemonTeam] = useState<PokemonWithIVs[]>([]);
+  const [allPokemon, setAllPokemon] = useState<PokemonWithIVs[]>([]);
+  const [showAllCards, setShowAllCards] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -149,6 +151,9 @@ export function TeamView() {
         // Filtrar los que sí existen
         const filteredPokemonData = pokemonData.filter(Boolean) as PokemonWithIVs[];
 
+        // Guardar todos los Pokémon
+        setAllPokemon(filteredPokemonData);
+
         // Seleccionar los 6 mejores Pokémon
         const bestTeam = selectBestTeam(filteredPokemonData);
         setPokemonTeam(bestTeam);
@@ -173,9 +178,21 @@ export function TeamView() {
 
   return (
     <div className="team-container">
-      <h2 className="trainer-title">Equipo Pokémon</h2>
+      <div className="team-header">
+        <h2 className="trainer-title">Equipo Pokémon</h2>
+        <div className="show-all-toggle">
+          <label>
+            <input
+              type="checkbox"
+              checked={showAllCards}
+              onChange={(e) => setShowAllCards(e.target.checked)}
+            />
+            Mostrar todos los Pokémon
+          </label>
+        </div>
+      </div>
       <div className="team-grid">
-        {pokemonTeam.map(pokemon => {
+        {(showAllCards ? allPokemon : pokemonTeam).map(pokemon => {
           // Seleccionar imagen
           const image = pokemon.sprites.front_shiny || pokemon.sprites.front_default;
           // PS
