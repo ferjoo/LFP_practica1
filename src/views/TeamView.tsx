@@ -8,6 +8,7 @@ import './TeamView.css';
 interface PokemonTeam {
   team: Array<{
     name: string;
+    type: string;
     stats: {
       salud: number;
       ataque: number;
@@ -18,7 +19,7 @@ interface PokemonTeam {
 
 interface PokemonWithIVs extends Pokemon {
   ivs: number;
-  type: string;
+  analyzerType: string;
 }
 
 export function TeamView() {
@@ -38,22 +39,22 @@ export function TeamView() {
     const selected: PokemonWithIVs[] = [];
     const usedTypes = new Set<string>();
 
-    // Primera pasada: seleccionar el mejor Pokémon de cada tipo
+    // Seleccionar el mejor Pokémon de cada tipo (según el tipo del analizador)
     for (const poke of sortedByIVs) {
       if (selected.length >= 6) break;
-      
-      if (!usedTypes.has(poke.type)) {
+      if (!usedTypes.has(poke.analyzerType)) {
         selected.push(poke);
-        usedTypes.add(poke.type);
+        usedTypes.add(poke.analyzerType);
       }
     }
 
-    // Si aún no tenemos 6 Pokémon, llenar con los mejores restantes
+    // Si aún no tenemos 6 Pokémon, llenar con los mejores restantes (sin repetir tipo)
     if (selected.length < 6) {
       for (const poke of sortedByIVs) {
         if (selected.length >= 6) break;
-        if (!selected.includes(poke)) {
+        if (!selected.includes(poke) && !usedTypes.has(poke.analyzerType)) {
           selected.push(poke);
+          usedTypes.add(poke.analyzerType);
         }
       }
     }
@@ -89,19 +90,20 @@ export function TeamView() {
           return;
         }
 
-        // Paso 2: Buscar los Pokémon y sus estadísticas
-        let currentPokemon: { name: string; stats: { salud: number; ataque: number; defensa: number } } | null = null;
+        // Paso 2: Buscar los Pokémon y sus estadísticas y tipo
+        let currentPokemon: { name: string; type: string; stats: { salud: number; ataque: number; defensa: number } } | null = null;
         let currentStat: 'salud' | 'ataque' | 'defensa' | null = null;
 
         for (let i = startIndex + 1; i < tokens.length; i++) {
           const token = tokens[i];
-          
-          if (token.type === 'STRING' && tokens[i + 1]?.type === 'LBRACKET') {
+          // Detectar inicio de Pokémon y extraer tipo del analizador
+          if (token.type === 'STRING' && tokens[i + 1]?.type === 'LBRACKET' && tokens[i + 2]?.type === 'IDENTIFIER') {
             if (currentPokemon) {
               teamData.team.push(currentPokemon);
             }
             currentPokemon = {
               name: token.lexeme.replace(/"/g, '').toLowerCase(),
+              type: tokens[i + 2].lexeme.toLowerCase(),
               stats: { salud: 0, ataque: 0, defensa: 0 }
             };
           } else if (token.type === 'IDENTIFIER' && ['salud', 'ataque', 'defensa'].includes(token.lexeme)) {
@@ -121,21 +123,34 @@ export function TeamView() {
           return;
         }
 
-        // Obtener datos de la API y calcular IVs
+        // Obtener datos de la API y calcular IVs, usando el tipo del analizador
+        const notFound: string[] = [];
         const pokemonData = await Promise.all(
           teamData.team.map(async p => {
-            const pokemon = await getPokemonInfo(p.name);
-            const ivs = calculateIVs(p.stats.salud, p.stats.ataque, p.stats.defensa);
-            return {
-              ...pokemon,
-              ivs,
-              type: pokemon.types[0]?.type.name || 'normal'
-            };
+            try {
+              const pokemon = await getPokemonInfo(p.name);
+              const ivs = calculateIVs(p.stats.salud, p.stats.ataque, p.stats.defensa);
+              return {
+                ...pokemon,
+                ivs,
+                analyzerType: p.type
+              };
+            } catch {
+              notFound.push(p.name);
+              return null;
+            }
           })
         );
 
+        if (notFound.length > 0) {
+          alert(`No se encontró en la API: ${notFound.join(', ')}`);
+        }
+
+        // Filtrar los que sí existen
+        const filteredPokemonData = pokemonData.filter(Boolean) as PokemonWithIVs[];
+
         // Seleccionar los 6 mejores Pokémon
-        const bestTeam = selectBestTeam(pokemonData);
+        const bestTeam = selectBestTeam(filteredPokemonData);
         setPokemonTeam(bestTeam);
       } catch (err) {
         setError('Error al cargar el equipo de Pokémon');
