@@ -3,12 +3,21 @@ import './App.css';
 import { HomeView } from './views/HomeView';
 import { ErrorLogsView } from './views/ErrorLogsView';
 import { TeamView } from './views/TeamView';
-import { AppProvider } from './context/AppContext';
+import { AppProvider, useApp } from './context/AppContext';
 
 type View = 'home' | 'errors' | 'team';
 
 function AppContent() {
   const [currentView, setCurrentView] = useState<View>('home');
+  const { clearEditor } = useApp();
+
+  const handleHomeClick = () => {
+    if (currentView === 'home') {
+      clearEditor();
+    } else {
+      setCurrentView('home');
+    }
+  };
 
   return (
     <div className="app">
@@ -17,7 +26,7 @@ function AppContent() {
         <div className="nav-menu">
           <button 
             className={`nav-btn ${currentView === 'home' ? 'active' : ''}`} 
-            onClick={() => setCurrentView('home')}
+            onClick={handleHomeClick}
           >
             Home
           </button>

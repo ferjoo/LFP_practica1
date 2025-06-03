@@ -8,14 +8,58 @@ import './TeamView.css';
 interface PokemonTeam {
   team: Array<{
     name: string;
+    stats: {
+      salud: number;
+      ataque: number;
+      defensa: number;
+    };
   }>;
 }
 
+interface PokemonWithIVs extends Pokemon {
+  ivs: number;
+  type: string;
+}
+
 export function TeamView() {
-  const { editorText } = useApp();
-  const [pokemonTeam, setPokemonTeam] = useState<Pokemon[]>([]);
+  const { editorText, analyzed, errors } = useApp();
+  const [pokemonTeam, setPokemonTeam] = useState<PokemonWithIVs[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const calculateIVs = (salud: number, ataque: number, defensa: number): number => {
+    return ((salud + ataque + defensa) / 45) * 100;
+  };
+
+  const selectBestTeam = (pokemon: PokemonWithIVs[]): PokemonWithIVs[] => {
+    // Ordenar por IVs de mayor a menor
+    const sortedByIVs = [...pokemon].sort((a, b) => b.ivs - a.ivs);
+    
+    const selected: PokemonWithIVs[] = [];
+    const usedTypes = new Set<string>();
+
+    // Primera pasada: seleccionar el mejor Pokémon de cada tipo
+    for (const poke of sortedByIVs) {
+      if (selected.length >= 6) break;
+      
+      if (!usedTypes.has(poke.type)) {
+        selected.push(poke);
+        usedTypes.add(poke.type);
+      }
+    }
+
+    // Si aún no tenemos 6 Pokémon, llenar con los mejores restantes
+    if (selected.length < 6) {
+      for (const poke of sortedByIVs) {
+        if (selected.length >= 6) break;
+        if (!selected.includes(poke)) {
+          selected.push(poke);
+        }
+      }
+    }
+
+    return selected;
+  };
 
   useEffect(() => {
     const fetchPokemonTeam = async () => {
@@ -23,12 +67,17 @@ export function TeamView() {
         setLoading(true);
         setError(null);
 
-        const { tokens, errors } = lexer(editorText);
+        if (!analyzed) {
+          setError('Por favor, analiza el código primero usando el botón "Analizar"');
+          return;
+        }
+
         if (errors.length > 0) {
           setError('Hay errores léxicos en el código. Por favor, corrígelos antes de ver el equipo.');
           return;
         }
 
+        const { tokens } = lexer(editorText);
         const teamData: PokemonTeam = {
           team: []
         };
@@ -40,29 +89,54 @@ export function TeamView() {
           return;
         }
 
-        // Paso 2: Buscar los Pokémon DESPUÉS de la llave de apertura
+        // Paso 2: Buscar los Pokémon y sus estadísticas
+        let currentPokemon: { name: string; stats: { salud: number; ataque: number; defensa: number } } | null = null;
+        let currentStat: 'salud' | 'ataque' | 'defensa' | null = null;
+
         for (let i = startIndex + 1; i < tokens.length; i++) {
           const token = tokens[i];
+          
           if (token.type === 'STRING' && tokens[i + 1]?.type === 'LBRACKET') {
-            const pokemonName = token.lexeme.replace(/"/g, '').toLowerCase();
-            teamData.team.push({ name: pokemonName });
+            if (currentPokemon) {
+              teamData.team.push(currentPokemon);
+            }
+            currentPokemon = {
+              name: token.lexeme.replace(/"/g, '').toLowerCase(),
+              stats: { salud: 0, ataque: 0, defensa: 0 }
+            };
+          } else if (token.type === 'IDENTIFIER' && ['salud', 'ataque', 'defensa'].includes(token.lexeme)) {
+            currentStat = token.lexeme as 'salud' | 'ataque' | 'defensa';
+          } else if (token.type === 'NUMBER' && currentStat && currentPokemon) {
+            currentPokemon.stats[currentStat] = parseInt(token.lexeme);
+            currentStat = null;
           }
         }
 
-        console.log('Objeto teamData antes de la búsqueda:', teamData);
+        if (currentPokemon) {
+          teamData.team.push(currentPokemon);
+        }
 
         if (teamData.team.length === 0) {
           setError('No se encontraron Pokémon en el equipo');
           return;
         }
 
-        console.log('Equipo encontrado:', teamData);
-
+        // Obtener datos de la API y calcular IVs
         const pokemonData = await Promise.all(
-          teamData.team.map(p => getPokemonInfo(p.name))
+          teamData.team.map(async p => {
+            const pokemon = await getPokemonInfo(p.name);
+            const ivs = calculateIVs(p.stats.salud, p.stats.ataque, p.stats.defensa);
+            return {
+              ...pokemon,
+              ivs,
+              type: pokemon.types[0]?.type.name || 'normal'
+            };
+          })
         );
 
-        setPokemonTeam(pokemonData);
+        // Seleccionar los 6 mejores Pokémon
+        const bestTeam = selectBestTeam(pokemonData);
+        setPokemonTeam(bestTeam);
       } catch (err) {
         setError('Error al cargar el equipo de Pokémon');
         console.error(err);
@@ -72,7 +146,7 @@ export function TeamView() {
     };
 
     fetchPokemonTeam();
-  }, [editorText]);
+  }, [editorText, analyzed, errors]);
 
   if (loading) {
     return <div className="loading">Cargando equipo...</div>;

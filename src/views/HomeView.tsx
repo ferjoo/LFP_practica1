@@ -5,7 +5,7 @@ import { TokenTable } from '../components/TokenTable';
 import { useApp } from '../context/AppContext';
 
 export function HomeView() {
-  const { editorText, setEditorText, tokens, setTokens, setErrors } = useApp();
+  const { editorText, setEditorText, tokens, setTokens, setErrors, setAnalyzed } = useApp();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
 
@@ -20,6 +20,7 @@ export function HomeView() {
     const result = lexer(editorText);
     setTokens(result.tokens);
     setErrors(result.errors);
+    setAnalyzed(true);
     
     if (result.errors.length > 0) {
       alert(`Se encontraron ${result.errors.length} errores léxicos en el código.`);
@@ -32,6 +33,7 @@ export function HomeView() {
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value;
     setEditorText(newText);
+    setAnalyzed(false);
     const result = lexer(newText);
     setTokens(result.tokens);
     setErrors(result.errors);

@@ -54,6 +54,8 @@ interface AppContextType {
   errors: Token[];
   setErrors: (errors: Token[]) => void;
   clearEditor: () => void;
+  analyzed: boolean;
+  setAnalyzed: (analyzed: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -62,11 +64,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [editorText, setEditorText] = useState(initialText);
   const [tokens, setTokens] = useState<Token[]>([]);
   const [errors, setErrors] = useState<Token[]>([]);
+  const [analyzed, setAnalyzed] = useState(false);
 
   const clearEditor = () => {
-    setEditorText('');
+    setEditorText(initialText);
     setTokens([]);
     setErrors([]);
+    setAnalyzed(false);
   };
 
   return (
@@ -77,7 +81,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setTokens,
       errors,
       setErrors,
-      clearEditor
+      clearEditor,
+      analyzed,
+      setAnalyzed
     }}>
       {children}
     </AppContext.Provider>
