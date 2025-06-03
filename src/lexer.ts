@@ -5,6 +5,11 @@ export interface Token {
   col: number;
 }
 
+export interface LexerResult {
+  tokens: Token[];
+  errors: Token[];
+}
+
 const tokenSpecs: [string, RegExp][] = [
   ['RESERVED', /^Jugador\b/],
   ['COLON', /^:/],
@@ -24,11 +29,15 @@ const tokenSpecs: [string, RegExp][] = [
   ['WHITESPACE', /^[ \t\r]+/],
 ];
 
-export function lexer(input: string): Token[] {
+export function lexer(input: string): LexerResult {
   const tokens: Token[] = [];
+  const errors: Token[] = [];
   let row = 1;
   let col = 1;
   let i = 0;
+
+  // Stack para rastrear paréntesis, llaves y corchetes
+  const stack: { type: string; row: number; col: number }[] = [];
 
   while (i < input.length) {
     let match = null;
@@ -40,8 +49,10 @@ export function lexer(input: string): Token[] {
         break;
       }
     }
+
     if (!match) {
-      tokens.push({ type: 'UNKNOWN', lexeme: input[i], row, col });
+      const error = { type: 'UNKNOWN', lexeme: input[i], row, col };
+      errors.push(error);
       if (input[i] === '\n') {
         row++;
         col = 1;
@@ -51,7 +62,31 @@ export function lexer(input: string): Token[] {
       i++;
       continue;
     }
+
     const lexeme = match[0];
+
+    // Manejar apertura de estructuras
+    if (matchedType === 'LBRACE' || matchedType === 'LPAREN' || matchedType === 'LBRACKET') {
+      stack.push({ type: matchedType, row, col });
+    }
+    // Manejar cierre de estructuras
+    else if (matchedType === 'RBRACE' || matchedType === 'RPAREN' || matchedType === 'RBRACKET') {
+      const expectedType = matchedType === 'RBRACE' ? 'LBRACE' :
+                          matchedType === 'RPAREN' ? 'LPAREN' :
+                          'LBRACKET';
+      
+      if (stack.length === 0 || stack[stack.length - 1].type !== expectedType) {
+        errors.push({
+          type: 'UNMATCHED_CLOSING',
+          lexeme,
+          row,
+          col
+        });
+      } else {
+        stack.pop();
+      }
+    }
+
     if (matchedType === 'NEWLINE') {
       row++;
       col = 1;
@@ -63,5 +98,19 @@ export function lexer(input: string): Token[] {
     }
     i += lexeme.length;
   }
-  return tokens;
+
+  // Verificar estructuras sin cerrar
+  while (stack.length > 0) {
+    const unclosed = stack.pop()!;
+    errors.push({
+      type: 'UNCLOSED_STRUCTURE',
+      lexeme: unclosed.type === 'LBRACE' ? '{' :
+              unclosed.type === 'LPAREN' ? '(' :
+              '[',
+      row: unclosed.row,
+      col: unclosed.col
+    });
+  }
+
+  return { tokens, errors };
 } 

@@ -1,42 +1,34 @@
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import { HomeView } from './views/HomeView';
+import { ErrorLogsView } from './views/ErrorLogsView';
+import { AppProvider } from './context/AppContext';
 
-function App() {
-  const homeViewRef = useRef<{ handleClearEditor: () => void }>(null);
+function AppContent() {
+  const [showErrors, setShowErrors] = useState(false);
 
-  const handleClearEditor = () => {
-    if (homeViewRef.current) {
-      homeViewRef.current.handleClearEditor();
-    }
-  };
-
-  const handleLoadFile = () => alert('Funcionalidad de cargar archivo no implementada.');
-  const handleSaveFile = () => alert('Funcionalidad de guardar archivo no implementada.');
+  const handleShowErrors = () => setShowErrors(true);
+  const handleShowHome = () => setShowErrors(false);
 
   return (
-    <div className="main-container">
+    <div className="app">
       <nav className="navbar">
-        <div className="navbar-left">
-          <span className="logo">Pokemon USAC</span>
-          <a href="#" onClick={() => window.location.reload()}>Home</a>
-          <a href="#" onClick={() => alert('Mostrar tabla de errores léxicos')}>Error Report</a>
-          <div className="dropdown">
-            <button className="dropbtn">Archivo ▼</button>
-            <div className="dropdown-content">
-              <button onClick={handleClearEditor}>Limpiar Editor</button>
-              <button onClick={handleLoadFile}>Cargar Archivo</button>
-              <button onClick={handleSaveFile}>Guardar Archivo</button>
-            </div>
-          </div>
-          <a href="#" onClick={() => alert('Manual Técnico')}>Manual Técnico</a>
-          <a href="#" onClick={() => alert('Manual de Usuario')}>Manual de Usuario</a>
+        <div className="nav-brand">Analizador Léxico</div>
+        <div className="nav-menu">
+          <button className="nav-btn" onClick={handleShowHome}>Home</button>
+          <button className="nav-btn" onClick={handleShowErrors}>Error Report</button>
         </div>
       </nav>
 
-      <HomeView ref={homeViewRef} onClearEditor={handleClearEditor} />
+      {showErrors ? <ErrorLogsView /> : <HomeView />}
     </div>
   );
 }
 
-export default App;
+export function App() {
+  return (
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
+  );
+}

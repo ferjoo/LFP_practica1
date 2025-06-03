@@ -15,7 +15,7 @@ body {
   justify-content: center;
 }
 
-.main-container {
+.app {
   width: 80vw;
   margin: 0 auto;
   background: #fff;
@@ -35,82 +35,33 @@ body {
   font-size: 1.1rem;
 }
 
-.navbar-left {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
-
-.logo {
+.nav-brand {
   font-weight: bold;
   font-size: 1.2rem;
   color: #1976d2;
   margin-right: 18px;
 }
 
-.navbar a {
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.nav-btn {
   color: #1976d2;
   text-decoration: none;
   margin-right: 8px;
   transition: color 0.2s;
-}
-
-.navbar a:hover {
-  color: #0d47a1;
-}
-
-.dropdown {
-  position: relative;
-}
-
-.dropbtn {
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  padding: 7px 18px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: background 0.2s;
-}
-
-.dropbtn:hover {
-  background: #1565c0;
-}
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background: #fff;
-  min-width: 170px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-  border-radius: 8px;
-  z-index: 10000;
-  top: 38px;
-  left: 0;
-
-}
-
-.dropdown:hover .dropdown-content,
-.dropdown:focus-within .dropdown-content {
-  display: block;
-}
-
-.dropdown-content button {
-  width: 100%;
   background: none;
   border: none;
-  padding: 12px 18px;
-  text-align: left;
   font-size: 1rem;
-  color: #222;
   cursor: pointer;
-  border-radius: 0;
-  transition: background 0.2s;
+  padding: 0;
 }
 
-.dropdown-content button:hover {
-  background: #f0f4fa;
+.nav-btn:hover {
+  color: #0d47a1;
 }
 
 .content {
@@ -196,16 +147,19 @@ body {
   font-weight: normal;
   font-style: normal;
 }
+
 .syntax-orange {
   color: #e67c00 !important;
   font-weight: normal;
   font-style: normal;
 }
+
 .syntax-purple {
   color: #8e24aa !important;
   font-weight: normal;
   font-style: normal;
 }
+
 .syntax-black {
   color: #222 !important;
   font-weight: normal;
@@ -291,8 +245,18 @@ body {
   background: #e3f0fc;
 }
 
+.no-errors {
+  padding: 20px;
+  text-align: center;
+  color: #1976d2;
+  font-size: 1.1rem;
+  background: #f0f4fa;
+  border-radius: 8px;
+  margin-top: 1rem;
+}
+
 @media (max-width: 900px) {
-  .main-container {
+  .app {
     padding: 18px 4vw;
   }
   .content {
