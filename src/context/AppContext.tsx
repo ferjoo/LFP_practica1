@@ -56,6 +56,7 @@ interface AppContextType {
   clearEditor: () => void;
   analyzed: boolean;
   setAnalyzed: (analyzed: boolean) => void;
+  resetToEmpty: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -73,6 +74,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setAnalyzed(false);
   };
 
+  const resetToEmpty = () => {
+    setEditorText('');
+    setTokens([]);
+    setErrors([]);
+    setAnalyzed(false);
+  };
+
   return (
     <AppContext.Provider value={{
       editorText,
@@ -83,7 +91,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setErrors,
       clearEditor,
       analyzed,
-      setAnalyzed
+      setAnalyzed,
+      resetToEmpty
     }}>
       {children}
     </AppContext.Provider>

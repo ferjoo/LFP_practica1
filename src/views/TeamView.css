@@ -186,4 +186,13 @@
   box-shadow: 0 1px 2px #bfc1c622;
   border: 2px solid #bfc1c6;
   min-height: 38px;
+}
+
+.team-grid {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  flex-wrap: nowrap;
 } 
