@@ -36,7 +36,6 @@ export function lexer(input: string): LexerResult {
   let col = 1;
   let i = 0;
 
-  // Stack para rastrear paréntesis, llaves y corchetes
   const stack: { type: string; row: number; col: number }[] = [];
 
   while (i < input.length) {
@@ -65,11 +64,9 @@ export function lexer(input: string): LexerResult {
 
     const lexeme = match[0];
 
-    // Manejar apertura de estructuras
     if (matchedType === 'LBRACE' || matchedType === 'LPAREN' || matchedType === 'LBRACKET') {
       stack.push({ type: matchedType, row, col });
     }
-    // Manejar cierre de estructuras
     else if (matchedType === 'RBRACE' || matchedType === 'RPAREN' || matchedType === 'RBRACKET') {
       const expectedType = matchedType === 'RBRACE' ? 'LBRACE' :
                           matchedType === 'RPAREN' ? 'LPAREN' :
@@ -99,7 +96,6 @@ export function lexer(input: string): LexerResult {
     i += lexeme.length;
   }
 
-  // Verificar estructuras sin cerrar
   while (stack.length > 0) {
     const unclosed = stack.pop()!;
     errors.push({

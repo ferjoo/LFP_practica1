@@ -35,13 +35,11 @@ export function TeamView() {
   };
 
   const selectBestTeam = (pokemon: PokemonWithIVs[]): PokemonWithIVs[] => {
-    // Ordenar por IVs de mayor a menor
     const sortedByIVs = [...pokemon].sort((a, b) => b.ivs - a.ivs);
     
     const selected: PokemonWithIVs[] = [];
     const usedTypes = new Set<string>();
 
-    // Seleccionar el mejor Pokémon de cada tipo (según el tipo del analizador)
     for (const poke of sortedByIVs) {
       if (selected.length >= 6) break;
       if (!usedTypes.has(poke.analyzerType)) {
@@ -50,7 +48,6 @@ export function TeamView() {
       }
     }
 
-    // Si aún no tenemos 6 Pokémon, llenar con los mejores restantes (sin repetir tipo)
     if (selected.length < 6) {
       for (const poke of sortedByIVs) {
         if (selected.length >= 6) break;
@@ -85,20 +82,17 @@ export function TeamView() {
           team: []
         };
 
-        // Paso 1: Encontrar la llave de apertura del equipo
         const startIndex = tokens.findIndex(t => t.type === 'LBRACE');
         if (startIndex === -1) {
           setError('No se encontró la estructura del equipo');
           return;
         }
 
-        // Paso 2: Buscar los Pokémon y sus estadísticas y tipo
         let currentPokemon: { name: string; type: string; stats: { salud: number; ataque: number; defensa: number } } | null = null;
         let currentStat: 'salud' | 'ataque' | 'defensa' | null = null;
 
         for (let i = startIndex + 1; i < tokens.length; i++) {
           const token = tokens[i];
-          // Detectar inicio de Pokémon y extraer tipo del analizador
           if (token.type === 'STRING' && tokens[i + 1]?.type === 'LBRACKET' && tokens[i + 2]?.type === 'IDENTIFIER') {
             if (currentPokemon) {
               teamData.team.push(currentPokemon);
@@ -125,7 +119,6 @@ export function TeamView() {
           return;
         }
 
-        // Obtener datos de la API y calcular IVs, usando el tipo del analizador
         const notFound: string[] = [];
         const pokemonData = await Promise.all(
           teamData.team.map(async p => {
@@ -148,13 +141,10 @@ export function TeamView() {
           alert(`No se encontró en la API: ${notFound.join(', ')}`);
         }
 
-        // Filtrar los que sí existen
         const filteredPokemonData = pokemonData.filter(Boolean) as PokemonWithIVs[];
 
-        // Guardar todos los Pokémon
         setAllPokemon(filteredPokemonData);
 
-        // Seleccionar los 6 mejores Pokémon
         const bestTeam = selectBestTeam(filteredPokemonData);
         setPokemonTeam(bestTeam);
       } catch (err) {
@@ -193,18 +183,14 @@ export function TeamView() {
       </div>
       <div className="team-grid">
         {(showAllCards ? allPokemon : pokemonTeam).map(pokemon => {
-          // Seleccionar imagen
           const image = pokemon.sprites.front_shiny || pokemon.sprites.front_default;
-          // PS
           const ps = pokemon.stats[0]?.base_stat;
-          // Seleccionar 2 ataques aleatorios de los primeros 10 movimientos
           const moves = pokemon.moves.slice(0, 10);
           const randomMoves = moves
             .sort(() => 0.5 - Math.random())
             .slice(0, 2)
             .map(m => m.move.name);
 
-          // Vibrant color palette for type badges
           const typeBadgeColors: { [key: string]: string } = {
             normal: '#A8A77A',
             fire: '#EE8130',
@@ -228,7 +214,6 @@ export function TeamView() {
           const badgeType = pokemon.types[0]?.type.name || 'normal';
           const badgeColor = typeBadgeColors[badgeType] || '#A8A77A';
 
-          // Brighter color palette for Pokémon types
           const typeColors: { [key: string]: string } = {
             normal: '#E0E0E0',
             fire: '#FF944D',
@@ -251,8 +236,7 @@ export function TeamView() {
           };
           const mainType = pokemon.types[0]?.type.name || 'normal';
           const cardBg = typeColors[mainType] || '#f8f8f8';
-
-          // Helper to convert hex to rgba
+          
           function hexToRgba(hex: string, alpha: number) {
             const h = hex.replace('#', '');
             const bigint = parseInt(h, 16);

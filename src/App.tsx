@@ -24,7 +24,6 @@ function AppContent() {
     setCurrentView('home');
   };
 
-  // Cargar archivo
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -35,11 +34,9 @@ function AppContent() {
       setCurrentView('home');
     };
     reader.readAsText(file);
-    // Limpiar el valor para poder volver a cargar el mismo archivo si se desea
     e.target.value = '';
   };
 
-  // Guardar archivo
   const handleSaveFile = () => {
     const blob = new Blob([editorText], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
