@@ -51,6 +51,7 @@ const initialText = `Jugador: "PokeEvee"{
 function App() {
   const [editorText, setEditorText] = useState(initialText);
   const [tokens, setTokens] = useState<Token[]>([]);
+  const [displayTokens, setDisplayTokens] = useState<Token[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
 
@@ -64,9 +65,21 @@ function App() {
   const handleAnalyze = () => {
     const result = lexer(editorText);
     setTokens(result);
+    setDisplayTokens(result);
   };
 
-  const handleClearEditor = () => setEditorText('');
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newText = e.target.value;
+    setEditorText(newText);
+    const result = lexer(newText);
+    setTokens(result);
+  };
+
+  const handleClearEditor = () => {
+    setEditorText('');
+    setTokens([]);
+    setDisplayTokens([]);
+  };
   const handleLoadFile = () => alert('Funcionalidad de cargar archivo no implementada.');
   const handleSaveFile = () => alert('Funcionalidad de guardar archivo no implementada.');
 
@@ -104,7 +117,7 @@ function App() {
               className="editor highlighted-textarea"
               ref={textareaRef}
               value={editorText}
-              onChange={e => setEditorText(e.target.value)}
+              onChange={handleTextChange}
               spellCheck={false}
               onScroll={e => {
                 if (preRef.current) {
@@ -134,7 +147,7 @@ function App() {
                 </tr>
               </thead>
               <tbody>
-                {tokens.map((t, idx) => (
+                {displayTokens.map((t, idx) => (
                   <tr key={idx}>
                     <td>{idx + 1}</td>
                     <td>{t.row}</td>
