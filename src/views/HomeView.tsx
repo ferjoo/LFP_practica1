@@ -33,9 +33,10 @@ export function HomeView() {
     const newText = e.target.value;
     setEditorText(newText);
     setAnalyzed(false);
-    const result = lexer(newText);
-    setTokens(result.tokens);
-    setErrors(result.errors);
+    // Solo analizar al presionar el botón, no en cada tecla:
+    // const result = lexer(newText);
+    // setTokens(result.tokens);
+    // setErrors(result.errors);
   };
 
   return (
