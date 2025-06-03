@@ -64,6 +64,11 @@ body {
   color: #0d47a1;
 }
 
+.nav-btn.active {
+  color: #0d47a1;
+  font-weight: 500;
+}
+
 .content {
   display: flex;
   gap: 32px;
@@ -253,6 +258,105 @@ body {
   background: #f0f4fa;
   border-radius: 8px;
   margin-top: 1rem;
+}
+
+/* Team View Styles */
+.team-container {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 24px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.pokemon-card {
+  background: #f9fbfd;
+  border: 1.5px solid #d0d7e2;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.pokemon-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1976d2;
+  margin-bottom: 16px;
+}
+
+.pokemon-types {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.type-badge {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: white;
+}
+
+.pokemon-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid #d0d7e2;
+  border-radius: 4px;
+}
+
+.stat-label {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.stat-value {
+  font-weight: 500;
+  color: #1976d2;
+}
+
+.loading {
+  text-align: center;
+  padding: 24px;
+  color: #1976d2;
+  font-size: 1.1rem;
+  background: #f0f4fa;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.error-message {
+  text-align: center;
+  padding: 24px;
+  color: #d32f2f;
+  font-size: 1.1rem;
+  background: #ffebee;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.trainer-title {
+  color: #1976d2;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+  text-align: center;
+  text-transform: capitalize;
 }
 
 @media (max-width: 900px) {

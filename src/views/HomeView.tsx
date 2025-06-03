@@ -23,7 +23,10 @@ export function HomeView() {
     
     if (result.errors.length > 0) {
       alert(`Se encontraron ${result.errors.length} errores léxicos en el código.`);
+      return;
     }
+
+    alert('Análisis léxico completado con éxito.');
   };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
