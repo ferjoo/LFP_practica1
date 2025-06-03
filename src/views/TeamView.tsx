@@ -78,6 +78,7 @@ export function TeamView() {
         }
 
         const { tokens } = lexer(editorText);
+        console.log(tokens);
         const teamData: PokemonTeam = {
           team: []
         };
@@ -93,6 +94,7 @@ export function TeamView() {
 
         for (let i = startIndex + 1; i < tokens.length; i++) {
           const token = tokens[i];
+          if (token.type === 'NEWLINE' || token.type === 'WHITESPACE') continue;
           if (token.type === 'STRING' && tokens[i + 1]?.type === 'LBRACKET' && tokens[i + 2]?.type === 'IDENTIFIER') {
             if (currentPokemon) {
               teamData.team.push(currentPokemon);

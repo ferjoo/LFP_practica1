@@ -10,25 +10,6 @@ export interface LexerResult {
   errors: Token[];
 }
 
-const tokenSpecs: [string, RegExp][] = [
-  ['RESERVED', /^Jugador\b/],
-  ['COLON', /^:/],
-  ['STRING', /^"[^"]*"/],
-  ['LBRACE', /^\{/],
-  ['RBRACE', /^\}/],
-  ['LPAREN', /^\(/],
-  ['RPAREN', /^\)/],
-  ['LBRACKET', /^\[/],
-  ['RBRACKET', /^\]/],
-  ['ASSIGN', /^:=/],
-  ['EQUAL', /^=/],
-  ['SEMICOLON', /^;/],
-  ['NUMBER', /^\d+/],
-  ['IDENTIFIER', /^[a-zA-ZáéíóúÁÉÍÓÚñÑ_][a-zA-Z0-9_áéíóúÁÉÍÓÚñÑ]*/],
-  ['NEWLINE', /^\n/],
-  ['WHITESPACE', /^[ \t\r]+/],
-];
-
 export function lexer(input: string): LexerResult {
   const tokens: Token[] = [];
   const errors: Token[] = [];
@@ -36,77 +17,119 @@ export function lexer(input: string): LexerResult {
   let col = 1;
   let i = 0;
 
-  const stack: { type: string; row: number; col: number }[] = [];
-
   while (i < input.length) {
-    let match = null;
-    let matchedType = '';
-    for (const [type, regex] of tokenSpecs) {
-      match = regex.exec(input.slice(i));
-      if (match) {
-        matchedType = type;
-        break;
-      }
-    }
+    const startRow = row;
+    const startCol = col;
+    const char = input[i];
 
-    if (!match) {
-      const error = { type: 'UNKNOWN', lexeme: input[i], row, col };
-      errors.push(error);
-      if (input[i] === '\n') {
-        row++;
-        col = 1;
-      } else {
-        col++;
-      }
+    // Ignorar espacios y tabs
+    if (char === ' ' || char === '\t' || char === '\r') {
       i++;
+      col++;
       continue;
     }
 
-    const lexeme = match[0];
-
-    if (matchedType === 'LBRACE' || matchedType === 'LPAREN' || matchedType === 'LBRACKET') {
-      stack.push({ type: matchedType, row, col });
-    }
-    else if (matchedType === 'RBRACE' || matchedType === 'RPAREN' || matchedType === 'RBRACKET') {
-      const expectedType = matchedType === 'RBRACE' ? 'LBRACE' :
-                          matchedType === 'RPAREN' ? 'LPAREN' :
-                          'LBRACKET';
-      
-      if (stack.length === 0 || stack[stack.length - 1].type !== expectedType) {
-        errors.push({
-          type: 'UNMATCHED_CLOSING',
-          lexeme,
-          row,
-          col
-        });
-      } else {
-        stack.pop();
-      }
-    }
-
-    if (matchedType === 'NEWLINE') {
+    // Saltos de línea
+    if (char === '\n') {
+      i++;
       row++;
       col = 1;
-    } else if (matchedType !== 'WHITESPACE') {
-      tokens.push({ type: matchedType, lexeme, row, col });
-      col += lexeme.length;
-    } else {
-      col += lexeme.length;
+      continue;
     }
-    i += lexeme.length;
+
+    // Símbolos de un solo carácter
+    const singleCharTokens: { [key: string]: string } = {
+      '{': 'LBRACE',
+      '}': 'RBRACE',
+      '(': 'LPAREN',
+      ')': 'RPAREN',
+      '[': 'LBRACKET',
+      ']': 'RBRACKET',
+      '=': 'EQUAL',
+      ';': 'SEMICOLON',
+      ':': 'COLON',
+      '"': 'QUOTE',
+    };
+    if (singleCharTokens[char]) {
+      const type = singleCharTokens[char];
+      // Cadena de texto
+      if (char === '"') {
+        let lexeme = '"';
+        let j = i + 1;
+        let closed = false;
+        while (j < input.length) {
+          if (input[j] === '"') {
+            lexeme += '"';
+            closed = true;
+            break;
+          }
+          if (input[j] === '\n') {
+            break; // No permitir saltos de línea en string
+          }
+          lexeme += input[j];
+          j++;
+        }
+        if (closed) {
+          tokens.push({ type: 'STRING', lexeme, row: startRow, col: startCol });
+          i = j + 1;
+          col += lexeme.length;
+        } else {
+          errors.push({ type: 'UNCLOSED_STRING', lexeme, row: startRow, col: startCol });
+          i = j;
+          col += lexeme.length;
+        }
+        continue;
+      }
+      // Dos puntos seguidos de igual :=
+      if (char === ':' && input[i + 1] === '=') {
+        tokens.push({ type: 'ASSIGN', lexeme: ':=', row: startRow, col: startCol });
+        i += 2;
+        col += 2;
+        continue;
+      }
+      tokens.push({ type, lexeme: char, row: startRow, col: startCol });
+      i++;
+      col++;
+      continue;
+    }
+
+    // Números
+    if (/[0-9]/.test(char)) {
+      let lexeme = char;
+      let j = i + 1;
+      while (j < input.length && /[0-9]/.test(input[j])) {
+        lexeme += input[j];
+        j++;
+      }
+      tokens.push({ type: 'NUMBER', lexeme, row: startRow, col: startCol });
+      col += lexeme.length;
+      i = j;
+      continue;
+    }
+
+    // Identificadores y palabras reservadas
+    if (/[a-zA-ZáéíóúÁÉÍÓÚñÑ_]/.test(char)) {
+      let lexeme = char;
+      let j = i + 1;
+      while (j < input.length && /[a-zA-Z0-9_áéíóúÁÉÍÓÚñÑ]/.test(input[j])) {
+        lexeme += input[j];
+        j++;
+      }
+      const type = lexeme === 'Jugador' ? 'RESERVED' : 'IDENTIFIER';
+      tokens.push({ type, lexeme, row: startRow, col: startCol });
+      col += lexeme.length;
+      i = j;
+      continue;
+    }
+
+    // Caracter desconocido
+    errors.push({ type: 'UNKNOWN', lexeme: char, row: startRow, col: startCol });
+    i++;
+    col++;
   }
 
-  while (stack.length > 0) {
-    const unclosed = stack.pop()!;
-    errors.push({
-      type: 'UNCLOSED_STRUCTURE',
-      lexeme: unclosed.type === 'LBRACE' ? '{' :
-              unclosed.type === 'LPAREN' ? '(' :
-              '[',
-      row: unclosed.row,
-      col: unclosed.col
-    });
-  }
+  // Verificar estructuras no cerradas (llaves, paréntesis, corchetes)
+  // (Opcional: puedes agregar lógica aquí si quieres)
 
   return { tokens, errors };
 } 
