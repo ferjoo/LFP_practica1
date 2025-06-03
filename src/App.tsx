@@ -13,7 +13,7 @@ function AppContent() {
   return (
     <div className="app">
       <nav className="navbar">
-        <div className="nav-brand">Analizador Léxico</div>
+        <div className="nav-brand">Analizador</div>
         <div className="nav-menu">
           <button 
             className={`nav-btn ${currentView === 'home' ? 'active' : ''}`} 

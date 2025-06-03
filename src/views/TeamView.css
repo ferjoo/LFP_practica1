@@ -1,0 +1,189 @@
+.pokemon-card-tcg {
+  background: repeating-linear-gradient(135deg, #e6e6e6 0 10px, #f8f8f8 10px 20px, #e6e6e6 20px 30px);
+  border: none;
+  border-radius: 22px;
+  box-shadow: 0 2px 16px 0 #bfc1c6cc, 0 1.5px 4px 0 #0001;
+  width: 320px;
+  height: 520px;
+  margin: 18px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  transition: transform 0.2s;
+  overflow: visible;
+  z-index: 1;
+}
+.pokemon-card-tcg::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 26px;
+  background: linear-gradient(120deg, #e0e0e0 0%, #bfc1c6 10%, #7ecfff 25%, #f8f8f8 40%, #ffb6e6 60%, #ffe066 75%, #bfc1c6 90%, #e0e0e0 100%);
+}
+.pokemon-card-tcg > * {
+  position: relative;
+  z-index: 1;
+  border-radius: inherit;
+}
+.pokemon-card-tcg:hover {
+  transform: scale(1.04) rotate(-1deg);
+  box-shadow: 0 12px 32px 0 #bfc1c6ee, 0 2px 8px 0 #0002;
+}
+
+.tcg-header {
+  width: 100%;
+  background: rgba(255,255,255,0.85);
+  border-bottom: 2px solid #bfc1c6;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  font-weight: bold;
+  font-size: 1.18em;
+  padding: 10px 16px 4px 16px;
+  box-sizing: border-box;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  border-left: 2px solid #bfc1c6;
+  border-right: 2px solid #bfc1c6;
+  margin-top: 5px;
+}
+
+.tcg-basic {
+  color: #222;
+  background: rgba(230,230,230,0.7);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.85em;
+  letter-spacing: 1px;
+  margin-right: 8px;
+  border: 1.5px solid #bfc1c6;
+}
+
+.tcg-name {
+  flex: 1;
+  text-align: left;
+  color: #222;
+  font-size: 1.35em;
+  font-weight: 600;
+  text-shadow: 0 1px 0 #fff, 0 2px 2px #e6e6e6;
+  margin-left: 4px;
+}
+
+.tcg-ps {
+  color: #222;
+  font-size: 1.15em;
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.tcg-type {
+  color: #222;
+  font-size: 1.2em;
+  margin-left: 8px;
+  background: rgba(230,230,230,0.7);
+  border-radius: 50%;
+  border: 1.5px solid #bfc1c6;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.tcg-image-container {
+  width: 90%;
+  height: 160px;
+  background: rgba(255,255,255,0.7);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #0001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 18px 0 8px 0;
+  border: 2.5px solid #bfc1c6;
+}
+
+.tcg-image {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
+
+.tcg-attacks {
+  width: 92%;
+  margin: 12px 0 0 0;
+  background: rgba(255,255,255,0.7);
+  border-radius: 8px;
+  border: 2px solid #bfc1c6;
+  box-shadow: 0 1px 2px #bfc1c622;
+  padding: 10px 10px 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tcg-attack {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0;
+  font-size: 1.08em;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 2px;
+}
+.tcg-attack:last-child {
+  border-bottom: none;
+}
+
+.tcg-attack-cost {
+  margin-right: 8px;
+  font-size: 1.15em;
+}
+
+.tcg-attack-name {
+  flex: 1;
+  font-weight: 500;
+  color: #333;
+}
+
+.tcg-attack-damage {
+  color: #222;
+  font-weight: bold;
+  margin-left: 10px;
+  font-size: 1.1em;
+}
+
+.tcg-footer {
+  width: 92%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 1em;
+  margin: 12px 0 0 0;
+  color: #555;
+  background: rgba(255,255,255,0.7);
+  border-radius: 8px;
+  border: 2px solid #bfc1c6;
+  box-shadow: 0 1px 2px #bfc1c622;
+  padding: 6px 10px 4px 10px;
+}
+
+.tcg-description {
+  width: 92%;
+  margin: 10px 0 0 0;
+  font-size: 0.98em;
+  color: #666;
+  text-align: left;
+  background: rgba(255,255,255,0.7);
+  border-radius: 8px;
+  padding: 7px 10px 7px 10px;
+  box-shadow: 0 1px 2px #bfc1c622;
+  border: 2px solid #bfc1c6;
+  min-height: 38px;
+} 
