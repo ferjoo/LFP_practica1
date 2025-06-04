@@ -1,8 +1,8 @@
 import React, { useRef, useLayoutEffect } from 'react';
-import { lexer } from '../lexer';
 import { highlightText } from '../highlightHelper';
 import { TokenTable } from '../components/TokenTable';
 import { useApp } from '../context/AppContext';
+import { analyzeCode } from '../api/lexerApi';
 
 export function HomeView() {
   const { editorText, setEditorText, tokens, setTokens, setErrors, setAnalyzed } = useApp();
@@ -16,16 +16,21 @@ export function HomeView() {
     }
   }, [editorText]);
 
-  const handleAnalyze = () => {
-    const result = lexer(editorText);
-    setTokens(result.tokens);
-    setErrors(result.errors);
-    setAnalyzed(true);
-    
-    if (result.errors.length > 0) {
-      alert(`Se encontraron ${result.errors.length} errores léxicos en el código.`);
-    } else {
-      alert('Análisis léxico completado con éxito.');
+  const handleAnalyze = async () => {
+    try {
+      const result = await analyzeCode(editorText);
+      setTokens(result.tokens);
+      setErrors(result.errors);
+      setAnalyzed(true);
+      
+      if (result.errors.length > 0) {
+        alert(`Se encontraron ${result.errors.length} errores léxicos en el código.`);
+      } else {
+        alert('Análisis léxico completado con éxito.');
+      }
+    } catch (error) {
+      console.error('Error analyzing code:', error);
+      alert('Error al analizar el código. Por favor, intente nuevamente.');
     }
   };
 
@@ -33,10 +38,6 @@ export function HomeView() {
     const newText = e.target.value;
     setEditorText(newText);
     setAnalyzed(false);
-    // Solo analizar al presionar el botón, no en cada tecla:
-    // const result = lexer(newText);
-    // setTokens(result.tokens);
-    // setErrors(result.errors);
   };
 
   return (

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { getPokemonInfo } from '../api/pokemonApi';
 import type { Pokemon } from '../api/pokemonApi';
-import { lexer } from '../lexer';
+import { analyzeCode } from '../api/lexerApi';
 import './TeamView.css';
 
 interface PokemonTeam {
@@ -77,7 +77,7 @@ export function TeamView() {
           return;
         }
 
-        const { tokens } = lexer(editorText);
+        const { tokens } = await analyzeCode(editorText);
         console.log(tokens);
         const teamData: PokemonTeam = {
           team: []
