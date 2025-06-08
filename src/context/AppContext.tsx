@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Token } from '../api/lexerApi';
 
-const initialText = `Equipo: "Equipo A" {
+const initialText = `Jugador: "Jugador 1" {
   "venusaur"[planta] := (
     [salud]=12;
     [ataque]=11;
@@ -52,7 +52,7 @@ const initialText = `Equipo: "Equipo A" {
   )
 }
 
-Equipo: "Equipo B" {
+Jugador: "Jugador 2" {
   "snorlax"[normal] := (
     [salud]=15;
     [ataque]=12;
@@ -72,7 +72,7 @@ Equipo: "Equipo B" {
   )
 }
 
-Equipo: "Equipo C" {
+Jugador: "Jugador 3" {
   "flareon"[fuego] := (
     [salud]=12;
     [ataque]=15;

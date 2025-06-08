@@ -17,6 +17,9 @@ export function lexer(input: string): LexerResult {
   let col = 1;
   let i = 0;
 
+  // Palabras reservadas
+  const reservedWords = new Set(['Equipo', 'Jugador', 'salud', 'ataque', 'defensa']);
+
   while (i < input.length) {
     const startRow = row;
     const startCol = col;
@@ -124,7 +127,7 @@ export function lexer(input: string): LexerResult {
         lexeme += input[j];
         j++;
       }
-      const type = lexeme === 'Equipo' ? 'RESERVED' : 'IDENTIFIER';
+      const type = reservedWords.has(lexeme) ? 'RESERVED' : 'IDENTIFIER';
       tokens.push({ type, lexeme, row: startRow, col: startCol });
       col += lexeme.length;
       i = j;
