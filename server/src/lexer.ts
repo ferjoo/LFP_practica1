@@ -143,6 +143,7 @@ export function lexer(input: string): LexerResult {
   // Verificar estructura general
   let braceCount = 0;
   let parenCount = 0;
+  let bracketCount = 0;
 
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
@@ -151,6 +152,8 @@ export function lexer(input: string): LexerResult {
     if (token.type === 'RBRACE') braceCount--;
     if (token.type === 'LPAREN') parenCount++;
     if (token.type === 'RPAREN') parenCount--;
+    if (token.type === 'LBRACKET') bracketCount++;
+    if (token.type === 'RBRACKET') bracketCount--;
 
     // Verificar asignaciones incompletas
     if (token.type === 'ASSIGN') {
@@ -199,6 +202,15 @@ export function lexer(input: string): LexerResult {
     errors.push({ 
       type: 'UNMATCHED_PARENS', 
       lexeme: parenCount > 0 ? '(' : ')', 
+      row: tokens[tokens.length - 1].row, 
+      col: tokens[tokens.length - 1].col 
+    });
+  }
+
+  if (bracketCount !== 0) {
+    errors.push({ 
+      type: 'UNMATCHED_BRACKETS', 
+      lexeme: bracketCount > 0 ? '[' : ']', 
       row: tokens[tokens.length - 1].row, 
       col: tokens[tokens.length - 1].col 
     });
