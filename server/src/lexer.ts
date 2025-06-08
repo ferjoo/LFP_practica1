@@ -50,8 +50,10 @@ export function lexer(input: string): LexerResult {
       ':': 'COLON',
       '"': 'QUOTE',
     };
+
     if (singleCharTokens[char]) {
       const type = singleCharTokens[char];
+      
       // Cadena de texto
       if (char === '"') {
         let lexeme = '"';
@@ -64,6 +66,12 @@ export function lexer(input: string): LexerResult {
             break;
           }
           if (input[j] === '\n') {
+            errors.push({ 
+              type: 'UNCLOSED_STRING', 
+              lexeme: lexeme + '...', 
+              row: startRow, 
+              col: startCol 
+            });
             break;
           }
           lexeme += input[j];
@@ -74,12 +82,12 @@ export function lexer(input: string): LexerResult {
           i = j + 1;
           col += lexeme.length;
         } else {
-          errors.push({ type: 'UNCLOSED_STRING', lexeme, row: startRow, col: startCol });
           i = j;
           col += lexeme.length;
         }
         continue;
       }
+
       // Dos puntos seguidos de igual :=
       if (char === ':' && input[i + 1] === '=') {
         tokens.push({ type: 'ASSIGN', lexeme: ':=', row: startRow, col: startCol });
@@ -87,6 +95,7 @@ export function lexer(input: string): LexerResult {
         col += 2;
         continue;
       }
+
       tokens.push({ type, lexeme: char, row: startRow, col: startCol });
       i++;
       col++;
@@ -115,7 +124,7 @@ export function lexer(input: string): LexerResult {
         lexeme += input[j];
         j++;
       }
-      const type = lexeme === 'Jugador' || lexeme === 'Equipo' ? 'RESERVED' : 'IDENTIFIER';
+      const type = lexeme === 'Equipo' ? 'RESERVED' : 'IDENTIFIER';
       tokens.push({ type, lexeme, row: startRow, col: startCol });
       col += lexeme.length;
       i = j;
@@ -126,6 +135,70 @@ export function lexer(input: string): LexerResult {
     errors.push({ type: 'UNKNOWN', lexeme: char, row: startRow, col: startCol });
     i++;
     col++;
+  }
+
+  // Verificar estructura general
+  let braceCount = 0;
+  let parenCount = 0;
+
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    
+    if (token.type === 'LBRACE') braceCount++;
+    if (token.type === 'RBRACE') braceCount--;
+    if (token.type === 'LPAREN') parenCount++;
+    if (token.type === 'RPAREN') parenCount--;
+
+    // Verificar asignaciones incompletas
+    if (token.type === 'ASSIGN') {
+      // Necesitamos verificar los tokens anteriores
+      if (i < 4) {
+        errors.push({ 
+          type: 'INVALID_ASSIGNMENT', 
+          lexeme: token.lexeme, 
+          row: token.row, 
+          col: token.col 
+        });
+        continue;
+      }
+
+      const prevTokens = tokens.slice(i - 4, i);
+      const [t1, t2, t3, t4] = prevTokens;
+
+      // Debug log
+      console.log('Assignment validation:', {
+        assign: token,
+        prevTokens: prevTokens.map(t => ({ type: t.type, lexeme: t.lexeme }))
+      });
+
+      // Verificar el patrón: STRING [IDENTIFIER] :=
+      if (t1.type !== 'STRING' || t2.type !== 'LBRACKET' || t3.type !== 'IDENTIFIER' || t4.type !== 'RBRACKET') {
+        errors.push({ 
+          type: 'INVALID_ASSIGNMENT', 
+          lexeme: token.lexeme, 
+          row: token.row, 
+          col: token.col 
+        });
+      }
+    }
+  }
+
+  if (braceCount !== 0) {
+    errors.push({ 
+      type: 'UNMATCHED_BRACES', 
+      lexeme: braceCount > 0 ? '{' : '}', 
+      row: tokens[tokens.length - 1].row, 
+      col: tokens[tokens.length - 1].col 
+    });
+  }
+
+  if (parenCount !== 0) {
+    errors.push({ 
+      type: 'UNMATCHED_PARENS', 
+      lexeme: parenCount > 0 ? '(' : ')', 
+      row: tokens[tokens.length - 1].row, 
+      col: tokens[tokens.length - 1].col 
+    });
   }
 
   return { tokens, errors };

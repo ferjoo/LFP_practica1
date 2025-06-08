@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Token } from '../lexer';
+import type { Token } from '../../server/src/lexer';
 
 interface TokenTableProps {
   tokens: Token[];
@@ -10,13 +10,21 @@ export function TokenTable({ tokens, showErrors = false }: TokenTableProps) {
   const getErrorDescription = (token: Token) => {
     switch (token.type) {
       case 'UNKNOWN':
-        return 'Caracter desconocido';
-      case 'UNMATCHED_CLOSING':
-        return 'Cierre de estructura sin apertura correspondiente';
-      case 'UNCLOSED_STRUCTURE':
-        return 'Estructura sin cerrar';
+        return 'Caracter desconocido o no válido';
+      case 'UNCLOSED_STRING':
+        return 'Cadena de texto sin cerrar';
+      case 'UNCLOSED_PAREN':
+        return 'Paréntesis sin cerrar';
+      case 'UNCLOSED_BRACE':
+        return 'Llave sin cerrar';
+      case 'UNMATCHED_BRACES':
+        return 'Llaves no balanceadas';
+      case 'UNMATCHED_PARENS':
+        return 'Paréntesis no balanceados';
+      case 'INVALID_ASSIGNMENT':
+        return 'Asignación inválida - falta identificador';
       default:
-        return 'Error desconocido';
+        return 'Error de sintaxis';
     }
   };
 
@@ -43,7 +51,7 @@ export function TokenTable({ tokens, showErrors = false }: TokenTableProps) {
         </thead>
         <tbody>
           {tokens.map((t, idx) => (
-            <tr key={idx}>
+            <tr key={idx} className={showErrors ? 'error-row' : ''}>
               <td>{idx + 1}</td>
               <td>{t.row}</td>
               <td>{t.col}</td>

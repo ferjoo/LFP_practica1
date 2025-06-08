@@ -15,7 +15,10 @@ app.post('/api/analyze', (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid input: code is required and must be a string' });
     }
     
-    const result = lexer(code);
+    // Normalize the input by replacing escaped newlines with actual newlines
+    const normalizedCode = code.replace(/\\n/g, '\n');
+    
+    const result = lexer(normalizedCode);
     res.json(result);
   } catch (error) {
     console.error('Error analyzing code:', error);

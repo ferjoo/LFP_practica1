@@ -252,6 +252,14 @@ body {
   background: #e3f0fc;
 }
 
+.tokens-table tr.error-row {
+  background-color: #ffebee;
+}
+
+.tokens-table tr.error-row:hover {
+  background-color: #ffcdd2;
+}
+
 .no-errors {
   padding: 20px;
   text-align: center;
