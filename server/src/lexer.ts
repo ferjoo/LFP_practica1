@@ -115,7 +115,7 @@ export function lexer(input: string): LexerResult {
         lexeme += input[j];
         j++;
       }
-      const type = lexeme === 'Jugador' ? 'RESERVED' : 'IDENTIFIER';
+      const type = lexeme === 'Jugador' || lexeme === 'Equipo' ? 'RESERVED' : 'IDENTIFIER';
       tokens.push({ type, lexeme, row: startRow, col: startCol });
       col += lexeme.length;
       i = j;

@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
-import type { Token } from '../lexer';
+import type { Token } from '../api/lexerApi';
 
-const initialText = `Jugador: "PokeEvee"{
+const initialText = `Equipo: "Equipo A" {
   "venusaur"[planta] := (
     [salud]=12;
     [ataque]=11;
@@ -21,6 +21,38 @@ const initialText = `Jugador: "PokeEvee"{
     [defensa]=15;
   )
 
+  "charizard"[fuego] := (
+    [salud]=13;
+    [ataque]=16;
+    [defensa]=12;
+  )
+
+  "blastoise"[agua] := (
+    [salud]=15;
+    [ataque]=12;
+    [defensa]=14;
+  )
+
+  "pikachu"[electrico] := (
+    [salud]=11;
+    [ataque]=14;
+    [defensa]=10;
+  )
+
+  "gyarados"[agua] := (
+    [salud]=14;
+    [ataque]=15;
+    [defensa]=13;
+  )
+
+  "alakazam"[psiquico] := (
+    [salud]=12;
+    [ataque]=16;
+    [defensa]=11;
+  )
+}
+
+Equipo: "Equipo B" {
   "snorlax"[normal] := (
     [salud]=15;
     [ataque]=12;
@@ -38,11 +70,61 @@ const initialText = `Jugador: "PokeEvee"{
     [ataque]=14;
     [defensa]=14;
   )
+}
 
+Equipo: "Equipo C" {
   "flareon"[fuego] := (
     [salud]=12;
     [ataque]=15;
     [defensa]=14;
+  )
+
+  "gengar"[fantasma] := (
+    [salud]=13;
+    [ataque]=14;
+    [defensa]=12;
+  )
+
+  "lapras"[agua] := (
+    [salud]=14;
+    [ataque]=12;
+    [defensa]=13;
+  )
+
+  "aerodactyl"[roca] := (
+    [salud]=13;
+    [ataque]=15;
+    [defensa]=12;
+  )
+
+  "ninetales"[fuego] := (
+    [salud]=12;
+    [ataque]=13;
+    [defensa]=14;
+  )
+
+  "vaporeon"[agua] := (
+    [salud]=15;
+    [ataque]=12;
+    [defensa]=13;
+  )
+
+  "jolteon"[electrico] := (
+    [salud]=12;
+    [ataque]=14;
+    [defensa]=12;
+  )
+
+  "exeggutor"[planta] := (
+    [salud]=14;
+    [ataque]=13;
+    [defensa]=14;
+  )
+
+  "rhydon"[tierra] := (
+    [salud]=15;
+    [ataque]=14;
+    [defensa]=15;
   )
 }`;
 

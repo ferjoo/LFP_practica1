@@ -25,6 +25,7 @@ body {
   height: 70vh;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .navbar {
