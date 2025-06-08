@@ -1,20 +1,51 @@
-import React, { useRef, useLayoutEffect } from 'react';
+import React, { useRef, useLayoutEffect, useState, useEffect } from 'react';
 import { highlightText } from '../highlightHelper';
 import { TokenTable } from '../components/TokenTable';
 import { useApp } from '../context/AppContext';
 import { analyzeCode } from '../api/lexerApi';
 
+function useDebouncedEffect(effect: () => void, deps: unknown[], delay: number) {
+  useEffect(() => {
+    const handler = setTimeout(() => effect(), delay);
+    return () => clearTimeout(handler);
+    // eslint-disable-next-line
+  }, [...deps, delay]);
+}
+
+function escapeHtml(text: string) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/\n/g, '<br/>');
+}
+
 export function HomeView() {
   const { editorText, setEditorText, tokens, setTokens, setErrors, setAnalyzed } = useApp();
+  const [lastStableHtml, setLastStableHtml] = useState<string>(escapeHtml(editorText));
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
 
   useLayoutEffect(() => {
     if (textareaRef.current && preRef.current) {
-      preRef.current.scrollTop = textareaRef.current.scrollTop;
-      preRef.current.scrollLeft = textareaRef.current.scrollLeft;
+      const { scrollTop, scrollLeft } = textareaRef.current;
+      preRef.current.scrollTop = scrollTop;
+      preRef.current.scrollLeft = scrollLeft;
     }
   }, [editorText]);
+
+  // Debounced live analysis for highlighting
+  useDebouncedEffect(() => {
+    let cancelled = false;
+    analyzeCode(editorText).then(result => {
+      if (!cancelled) {
+        setLastStableHtml(highlightText(editorText, result.tokens));
+      }
+    });
+    return () => { cancelled = true; };
+  }, [editorText], 100);
 
   const handleAnalyze = async () => {
     try {
@@ -49,7 +80,19 @@ export function HomeView() {
             className="highlighted-pre"
             ref={preRef}
             aria-hidden="true"
-            dangerouslySetInnerHTML={{ __html: highlightText(editorText, tokens) + '\n' }}
+            style={{
+              margin: 0,
+              font: 'inherit',
+              lineHeight: 'inherit',
+              padding: 'inherit',
+              boxSizing: 'border-box',
+              whiteSpace: 'pre-wrap',
+              wordWrap: 'break-word',
+              border: 'none',
+              background: 'none',
+              minHeight: '100%',
+            }}
+            dangerouslySetInnerHTML={{ __html: lastStableHtml }}
           />
           <textarea
             className="editor highlighted-textarea"
@@ -62,6 +105,27 @@ export function HomeView() {
                 preRef.current.scrollTop = (e.target as HTMLTextAreaElement).scrollTop;
                 preRef.current.scrollLeft = (e.target as HTMLTextAreaElement).scrollLeft;
               }
+            }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              resize: 'none',
+              background: 'transparent',
+              color: 'transparent',
+              caretColor: 'black',
+              padding: 'inherit',
+              font: 'inherit',
+              lineHeight: 'inherit',
+              border: 'none',
+              outline: 'none',
+              overflow: 'auto',
+              whiteSpace: 'pre-wrap',
+              wordWrap: 'break-word',
+              boxSizing: 'border-box',
+              minHeight: '100%',
             }}
           />
         </div>
