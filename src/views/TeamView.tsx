@@ -305,7 +305,12 @@ export function TeamView() {
               {(showAllCards[team.name] ? pokemonData[team.name] : bestTeams[team.name])?.map((pokemon) => (
                 <div key={pokemon.name} className="pokemon-card-tcg">
                   <div className="tcg-header">
-                    <span className="tcg-basic">Básico</span>
+                    <span 
+                      className="tcg-basic"
+                      style={{ backgroundColor: typeBadgeColors[pokemon.types[0].type.name] }}
+                    >
+                      {pokemon.types[0].type.name.charAt(0).toUpperCase() + pokemon.types[0].type.name.slice(1)}
+                    </span>
                     <span className="tcg-name">{pokemon.name}</span>
                     <span className="tcg-ps">PS {pokemon.base_experience}</span>
                     <span className="tcg-type" style={{ backgroundColor: typeBadgeColors[pokemon.types[0].type.name] }}>

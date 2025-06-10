@@ -56,14 +56,17 @@
 }
 
 .tcg-basic {
-  color: #222;
-  background: rgba(230,230,230,0.7);
-  border-radius: 4px;
-  padding: 2px 8px;
-  font-size: 0.85em;
+  display: inline-block;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 6px 18px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  margin-right: 10px;
   letter-spacing: 1px;
-  margin-right: 8px;
-  border: 1.5px solid #bfc1c6;
+  text-transform: capitalize;
+  border: 2px solid rgba(0,0,0,0.08);
 }
 
 .tcg-name {
