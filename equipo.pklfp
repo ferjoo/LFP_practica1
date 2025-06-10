@@ -1,0 +1,137 @@
+Jugador: "Jugador 1" {
+  "venusaur"[planta] := (
+    [salud]=12;
+    [ataque]=11;
+    [defensa]=15;
+  )
+
+  "dragonite"[dragon] := (
+    [salud]=10;
+    [ataque]=15;
+    [defensa]=14;
+  )
+
+  "charizard"[fuego] := (
+    [salud]=13;
+    [ataque]=16;
+    [defensa]=12;
+  )
+
+  "alakazam"[psiquico] := (
+    [salud]=12;
+    [ataque]=16;
+    [defensa]=11;
+  )
+}
+
+Jugador: "Jugador 2" {
+  "snorlax"[normal] := (
+    [salud]=15;
+    [ataque]=12;
+    [defensa]=14;
+  )
+
+  "victreebel"[planta] := (
+    [salud]=15;
+    [ataque]=14;
+    [defensa]=14;
+  )
+
+  "gyarados"[agua] := (
+    [salud]=14;
+    [ataque]=15;
+    [defensa]=13;
+  )
+
+  "kingdra"[dragon] := (
+    [salud]=13;
+    [ataque]=15;
+    [defensa]=14;
+  )
+
+  "rapidash"[fuego] := (
+    [salud]=12;
+    [ataque]=16;
+    [defensa]=13;
+  )
+
+  "starmie"[agua] := (
+    [salud]=13;
+    [ataque]=15;
+    [defensa]=14;
+  )
+
+  "hypno"[psiquico] := (
+    [salud]=14;
+    [ataque]=13;
+    [defensa]=15;
+  )
+
+  "kangaskhan"[normal] := (
+    [salud]=15;
+    [ataque]=14;
+    [defensa]=13;
+  )
+}
+
+Jugador: "Jugador 3" {
+  "flareon"[fuego] := (
+    [salud]=12;
+    [ataque]=15;
+    [defensa]=14;
+  )
+
+  "lapras"[agua] := (
+    [salud]=14;
+    [ataque]=12;
+    [defensa]=13;
+  )
+
+  "ninetales"[fuego] := (
+    [salud]=12;
+    [ataque]=13;
+    [defensa]=14;
+  )
+
+  "vaporeon"[agua] := (
+    [salud]=15;
+    [ataque]=12;
+    [defensa]=13;
+  )
+
+  "exeggutor"[planta] := (
+    [salud]=14;
+    [ataque]=13;
+    [defensa]=14;
+  )
+
+  "dragonair"[dragon] := (
+    [salud]=13;
+    [ataque]=14;
+    [defensa]=15;
+  )
+
+  "jynx"[psiquico] := (
+    [salud]=12;
+    [ataque]=15;
+    [defensa]=13;
+  )
+
+  "tauros"[normal] := (
+    [salud]=14;
+    [ataque]=16;
+    [defensa]=12;
+  )
+
+  "blastoise"[agua] := (
+    [salud]=15;
+    [ataque]=13;
+    [defensa]=14;
+  )
+
+  "arcanine"[fuego] := (
+    [salud]=14;
+    [ataque]=15;
+    [defensa]=13;
+  )
+} 

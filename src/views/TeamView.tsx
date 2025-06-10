@@ -25,6 +25,17 @@ interface PokemonWithIVs extends Pokemon {
     defensa: number;
   };
   analyzerType: string;
+  base_experience: number;
+  sprites: {
+    front_default: string;
+    back_default: string;
+    front_shiny: string;
+    other: {
+      'official-artwork': {
+        front_default: string;
+      };
+    };
+  };
 }
 
 export function TeamView() {
@@ -41,6 +52,7 @@ export function TeamView() {
   };
 
   const selectBestTeam = (pokemon: PokemonWithIVs[]): PokemonWithIVs[] => {
+    // Sort all Pokémon by their total IVs
     const sortedByIVs = [...pokemon].sort((a, b) => {
       const aIV = calculateIVs(a.ivs.salud, a.ivs.ataque, a.ivs.defensa);
       const bIV = calculateIVs(b.ivs.salud, b.ivs.ataque, b.ivs.defensa);
@@ -50,6 +62,7 @@ export function TeamView() {
     const selected: PokemonWithIVs[] = [];
     const usedTypes = new Set<string>();
 
+    // First pass: Try to get one of each type with the best IVs
     for (const poke of sortedByIVs) {
       if (selected.length >= 6) break;
       if (!usedTypes.has(poke.analyzerType)) {
@@ -58,17 +71,22 @@ export function TeamView() {
       }
     }
 
+    // Second pass: Fill remaining slots with best IV Pokémon regardless of type
     if (selected.length < 6) {
       for (const poke of sortedByIVs) {
         if (selected.length >= 6) break;
-        if (!selected.includes(poke) && !usedTypes.has(poke.analyzerType)) {
+        if (!selected.includes(poke)) {
           selected.push(poke);
-          usedTypes.add(poke.analyzerType);
         }
       }
     }
 
-    return selected;
+    // Sort final selection by IVs again to ensure best order
+    return selected.sort((a, b) => {
+      const aIV = calculateIVs(a.ivs.salud, a.ivs.ataque, a.ivs.defensa);
+      const bIV = calculateIVs(b.ivs.salud, b.ivs.ataque, b.ivs.defensa);
+      return bIV - aIV;
+    });
   };
 
   useEffect(() => {
@@ -78,16 +96,21 @@ export function TeamView() {
         setError(null);
 
         if (!analyzed) {
+          console.log('Not analyzed yet');
           setError('Por favor, analiza el código primero usando el botón "Analizar"');
           return;
         }
 
         if (errors.length > 0) {
+          console.log('Has errors:', errors);
           setError('Hay errores léxicos en el código. Por favor, corrígelos antes de ver los equipos.');
           return;
         }
 
+        console.log('Analyzing code:', editorText);
         const { tokens } = await analyzeCode(editorText);
+        console.log('Tokens received:', tokens);
+
         const teamsData: PokemonTeam[] = [];
         let currentTeam: PokemonTeam | null = null;
         let currentPokemon: { name: string; type: string; stats: { salud: number; ataque: number; defensa: number } } | null = null;
@@ -97,7 +120,7 @@ export function TeamView() {
           const token = tokens[i];
           if (token.type === 'NEWLINE' || token.type === 'WHITESPACE') continue;
 
-          if (token.type === 'RESERVED' && token.lexeme === 'Equipo' && tokens[i + 1]?.type === 'COLON' && tokens[i + 2]?.type === 'STRING') {
+          if (token.type === 'RESERVED' && token.lexeme === 'Jugador' && tokens[i + 1]?.type === 'COLON' && tokens[i + 2]?.type === 'STRING') {
             if (currentTeam) {
               teamsData.push(currentTeam);
             }
@@ -107,7 +130,7 @@ export function TeamView() {
             };
             i += 2;
           }
-          else if (token.type === 'STRING' && tokens[i + 1]?.type === 'LBRACKET' && tokens[i + 2]?.type === 'IDENTIFIER') {
+          else if (token.type === 'STRING' && tokens[i + 1]?.type === 'LBRACKET' && tokens[i + 2]?.type === 'RESERVED') {
             if (currentPokemon && currentTeam) {
               currentTeam.team.push(currentPokemon);
             }
@@ -118,7 +141,7 @@ export function TeamView() {
             };
             i += 2;
           }
-          else if (token.type === 'IDENTIFIER' && ['salud', 'ataque', 'defensa'].includes(token.lexeme)) {
+          else if (token.type === 'RESERVED' && ['salud', 'ataque', 'defensa'].includes(token.lexeme)) {
             currentStat = token.lexeme as 'salud' | 'ataque' | 'defensa';
           }
           else if (token.type === 'NUMBER' && currentStat && currentPokemon) {
@@ -134,6 +157,7 @@ export function TeamView() {
           teamsData.push(currentTeam);
         }
 
+        console.log('Parsed teams:', teamsData);
         setTeams(teamsData);
 
         // Fetch Pokemon data for each team
@@ -142,17 +166,20 @@ export function TeamView() {
         const initialShowAll: { [key: string]: boolean } = {};
 
         for (const team of teamsData) {
+          console.log('Fetching data for team:', team.name);
           const notFound: string[] = [];
           const pokemonData = await Promise.all(
             team.team.map(async p => {
               try {
+                console.log('Fetching pokemon:', p.name);
                 const pokemon = await getPokemonInfo(p.name);
                 return {
                   ...pokemon,
                   ivs: p.stats,
                   analyzerType: p.type
                 };
-              } catch {
+              } catch (error) {
+                console.error('Error fetching pokemon:', p.name, error);
                 notFound.push(p.name);
                 return null;
               }
@@ -160,6 +187,7 @@ export function TeamView() {
           );
 
           if (notFound.length > 0) {
+            console.log('Pokemon not found:', notFound);
             alert(`No se encontró en la API: ${notFound.join(', ')}`);
           }
 
@@ -169,6 +197,7 @@ export function TeamView() {
           initialShowAll[team.name] = false;
         }
 
+        console.log('Final pokemon data:', teamPokemonData);
         setPokemonData(teamPokemonData);
         setBestTeams(bestTeamsData);
         setShowAllCards(initialShowAll);
@@ -182,9 +211,6 @@ export function TeamView() {
 
     fetchPokemonTeams();
   }, [editorText, analyzed, errors]);
-
-  if (loading) return <div className="loading">Cargando equipos...</div>;
-  if (error) return <div className="error">{error}</div>;
 
   const typeBadgeColors: { [key: string]: string } = {
     normal: '#A8A77A',
@@ -204,110 +230,73 @@ export function TeamView() {
     dragon: '#6F35FC',
     dark: '#705746',
     steel: '#B7B7CE',
-    fairy: '#D685AD',
+    fairy: '#D685AD'
   };
 
-  const typeColors: { [key: string]: string } = {
-    normal: '#E0E0E0',
-    fire: '#FF944D',
-    water: '#4DC3FF',
-    electric: '#FFE066',
-    grass: '#6DFF6D',
-    ice: '#6DE3FF',
-    fighting: '#C68642',
-    poison: '#C86DFF',
-    ground: '#FFD36D',
-    flying: '#A6D1FF',
-    psychic: '#FF6DCB',
-    bug: '#B6FF6D',
-    rock: '#E2C290',
-    ghost: '#A89CFF',
-    dragon: '#6D9CFF',
-    dark: '#A6A6A6',
-    steel: '#B8E0E6',
-    fairy: '#FFB6E6',
-  };
-
-  function hexToRgba(hex: string, alpha: number) {
-    const h = hex.replace('#', '');
-    const bigint = parseInt(h, 16);
-    const r = (bigint >> 16) & 255;
-    const g = (bigint >> 8) & 255;
-    const b = bigint & 255;
-    return `rgba(${r},${g},${b},${alpha})`;
-  }
+  if (loading) return <div className="loading">Cargando equipos...</div>;
+  if (error) return <div className="error">{error}</div>;
 
   return (
     <div className="teams-container">
-      {teams.map((team, teamIndex) => (
-        <div key={teamIndex} className="team-section">
+      {teams.map((team) => (
+        <div key={team.name} className="team-section">
           <div className="team-header">
             <h2 className="team-name">{team.name}</h2>
             <div className="show-all-toggle">
               <label>
                 <input
                   type="checkbox"
-                  checked={showAllCards[team.name]}
-                  onChange={(e) => setShowAllCards(prev => ({ ...prev, [team.name]: e.target.checked }))}
+                  checked={showAllCards[team.name] || false}
+                  onChange={(e) => setShowAllCards(prev => ({
+                    ...prev,
+                    [team.name]: e.target.checked
+                  }))}
                 />
                 Mostrar todos los Pokémon
               </label>
             </div>
           </div>
           <div className="team-grid">
-            {(showAllCards[team.name] ? pokemonData[team.name] : bestTeams[team.name])?.map(pokemon => {
-              const image = pokemon.sprites.front_shiny || pokemon.sprites.front_default;
-              const ps = pokemon.stats[0]?.base_stat;
-              const moves = pokemon.moves.slice(0, 10);
-              const randomMoves = moves
-                .sort(() => 0.5 - Math.random())
-                .slice(0, 2)
-                .map(m => m.move.name);
-
-              const badgeType = pokemon.types[0]?.type.name || 'normal';
-              const badgeColor = typeBadgeColors[badgeType] || '#A8A77A';
-              const mainType = pokemon.types[0]?.type.name || 'normal';
-              const cardBg = typeColors[mainType] || '#f8f8f8';
-              const softBg = hexToRgba(cardBg, 0.45);
-
-              const ivPercentage = calculateIVs(pokemon.ivs.salud, pokemon.ivs.ataque, pokemon.ivs.defensa);
-
-              return (
-                <div key={pokemon.id} className="pokemon-card-tcg" style={{ background: `radial-gradient(circle at 60% 40%, #fff8 0%, transparent 70%), ${cardBg}` }}>
-                  <div className="tcg-header" style={{ background: softBg }}>
-                    <span className="tcg-basic" style={{ background: badgeColor, color: '#fff', border: '1.5px solid #fff', textShadow: '0 1px 2px #0006' }}>
-                      {badgeType.charAt(0).toUpperCase() + badgeType.slice(1)}
-                    </span>
-                    <span className="tcg-name">{pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}</span>
-                    <span className="tcg-ps">PS {ps}</span>
-                    <span className="tcg-type">★</span>
+            {(showAllCards[team.name] ? pokemonData[team.name] : bestTeams[team.name])?.map((pokemon) => (
+              <div key={pokemon.name} className="pokemon-card-tcg">
+                <div className="tcg-header">
+                  <span className="tcg-basic">Básico</span>
+                  <span className="tcg-name">{pokemon.name}</span>
+                  <span className="tcg-ps">PS {pokemon.base_experience}</span>
+                  <span className="tcg-type" style={{ backgroundColor: typeBadgeColors[pokemon.types[0].type.name] }}>
+                    {pokemon.types[0].type.name[0].toUpperCase()}
+                  </span>
+                </div>
+                <div className="tcg-image-container">
+                  <img 
+                    src={pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default} 
+                    alt={pokemon.name}
+                    className="tcg-image"
+                  />
+                </div>
+                <div className="tcg-attacks">
+                  <div className="tcg-attack">
+                    <span className="tcg-attack-cost">HP</span>
+                    <span className="tcg-attack-name">Salud</span>
+                    <span className="tcg-attack-damage">{pokemon.ivs.salud}</span>
                   </div>
-                  <div className="tcg-image-container" style={{ background: softBg }}>
-                    <img src={image} alt={pokemon.name} className="tcg-image" />
+                  <div className="tcg-attack">
+                    <span className="tcg-attack-cost">ATK</span>
+                    <span className="tcg-attack-name">Ataque</span>
+                    <span className="tcg-attack-damage">{pokemon.ivs.ataque}</span>
                   </div>
-                  <div className="tcg-attacks" style={{ background: softBg }}>
-                    {randomMoves.map((move, idx) => (
-                      <div key={move} className="tcg-attack">
-                        <span className="tcg-attack-cost">⚪⚪</span>
-                        <span className="tcg-attack-name">{move.charAt(0).toUpperCase() + move.slice(1)}</span>
-                        <span className="tcg-attack-damage">{idx === 0 ? 30 : 20}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="tcg-footer" style={{ background: softBg }}>
-                    <span className="tcg-weakness">Debilidad: +20</span>
-                    <span className="tcg-retreat">Retirada: ⚪⚪</span>
-                  </div>
-                  <div className="tcg-description" style={{ background: softBg }}>
-                    <small>
-                      Descripción: {pokemon.name} es un Pokémon de tipo {pokemon.types.map(t => t.type.name).join(', ')}.
-                      <br />
-                      IVs: {ivPercentage.toFixed(1)}% (Salud: {pokemon.ivs.salud}, Ataque: {pokemon.ivs.ataque}, Defensa: {pokemon.ivs.defensa})
-                    </small>
+                  <div className="tcg-attack">
+                    <span className="tcg-attack-cost">DEF</span>
+                    <span className="tcg-attack-name">Defensa</span>
+                    <span className="tcg-attack-damage">{pokemon.ivs.defensa}</span>
                   </div>
                 </div>
-              );
-            })}
+                <div className="tcg-footer">
+                  <span>IV Total: {calculateIVs(pokemon.ivs.salud, pokemon.ivs.ataque, pokemon.ivs.defensa).toFixed(1)}%</span>
+                  <span>Tipo: {pokemon.analyzerType}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       ))}

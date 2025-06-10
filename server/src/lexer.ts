@@ -18,7 +18,19 @@ export function lexer(input: string): LexerResult {
   let i = 0;
 
   // Palabras reservadas
-  const reservedWords = new Set(['Equipo', 'Jugador', 'salud', 'ataque', 'defensa']);
+  const reservedWords = new Set([
+    'Equipo', 
+    'Jugador', 
+    'salud', 
+    'ataque', 
+    'defensa',
+    'agua',
+    'dragon',
+    'planta',
+    'psiquico',
+    'fuego',
+    'normal'
+  ]);
 
   while (i < input.length) {
     const startRow = row;
@@ -178,7 +190,8 @@ export function lexer(input: string): LexerResult {
       });
 
       // Verificar el patrón: STRING [IDENTIFIER] :=
-      if (t1.type !== 'STRING' || t2.type !== 'LBRACKET' || t3.type !== 'IDENTIFIER' || t4.type !== 'RBRACKET') {
+      if (t1.type !== 'STRING' || t2.type !== 'LBRACKET' || 
+          (t3.type !== 'IDENTIFIER' && t3.type !== 'RESERVED') || t4.type !== 'RBRACKET') {
         errors.push({ 
           type: 'INVALID_ASSIGNMENT', 
           lexeme: token.lexeme, 
