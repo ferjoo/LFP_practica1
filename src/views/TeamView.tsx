@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { getPokemonInfo } from '../api/pokemonApi';
 import type { Pokemon } from '../api/pokemonApi';
@@ -46,6 +46,8 @@ export function TeamView() {
   const [showAllCards, setShowAllCards] = useState<{ [key: string]: boolean }>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const gridRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const [isOverflowing, setIsOverflowing] = useState<{ [key: string]: boolean }>({});
 
   const calculateIVs = (salud: number, ataque: number, defensa: number): number => {
     return ((salud + ataque + defensa) / 45) * 100;
@@ -86,6 +88,19 @@ export function TeamView() {
       const aIV = calculateIVs(a.ivs.salud, a.ivs.ataque, a.ivs.defensa);
       const bIV = calculateIVs(b.ivs.salud, b.ivs.ataque, b.ivs.defensa);
       return bIV - aIV;
+    });
+  };
+
+  const scrollTeam = (teamName: string, direction: 'left' | 'right') => {
+    const container = gridRefs.current[teamName];
+    if (!container) return;
+    const scrollAmount = 800;
+    const newPosition = direction === 'left'
+      ? Math.max(0, container.scrollLeft - scrollAmount)
+      : container.scrollLeft + scrollAmount;
+    container.scrollTo({
+      left: newPosition,
+      behavior: 'smooth'
     });
   };
 
@@ -212,6 +227,23 @@ export function TeamView() {
     fetchPokemonTeams();
   }, [editorText, analyzed, errors]);
 
+  // Check for overflow on mount, update, and resize
+  useEffect(() => {
+    const checkOverflow = () => {
+      const newOverflow: { [key: string]: boolean } = {};
+      teams.forEach(team => {
+        const grid = gridRefs.current[team.name];
+        if (grid) {
+          newOverflow[team.name] = grid.scrollWidth > grid.clientWidth;
+        }
+      });
+      setIsOverflowing(newOverflow);
+    };
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [teams, showAllCards, pokemonData, bestTeams]);
+
   const typeBadgeColors: { [key: string]: string } = {
     normal: '#A8A77A',
     fire: '#EE8130',
@@ -239,7 +271,7 @@ export function TeamView() {
   return (
     <div className="teams-container">
       {teams.map((team) => (
-        <div key={team.name} className="team-section">
+        <div key={team.name} id={`team-${team.name}`} className="team-section">
           <div className="team-header">
             <h2 className="team-name">{team.name}</h2>
             <div className="show-all-toggle">
@@ -256,47 +288,70 @@ export function TeamView() {
               </label>
             </div>
           </div>
-          <div className="team-grid">
-            {(showAllCards[team.name] ? pokemonData[team.name] : bestTeams[team.name])?.map((pokemon) => (
-              <div key={pokemon.name} className="pokemon-card-tcg">
-                <div className="tcg-header">
-                  <span className="tcg-basic">Básico</span>
-                  <span className="tcg-name">{pokemon.name}</span>
-                  <span className="tcg-ps">PS {pokemon.base_experience}</span>
-                  <span className="tcg-type" style={{ backgroundColor: typeBadgeColors[pokemon.types[0].type.name] }}>
-                    {pokemon.types[0].type.name[0].toUpperCase()}
-                  </span>
-                </div>
-                <div className="tcg-image-container">
-                  <img 
-                    src={pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default} 
-                    alt={pokemon.name}
-                    className="tcg-image"
-                  />
-                </div>
-                <div className="tcg-attacks">
-                  <div className="tcg-attack">
-                    <span className="tcg-attack-cost">HP</span>
-                    <span className="tcg-attack-name">Salud</span>
-                    <span className="tcg-attack-damage">{pokemon.ivs.salud}</span>
+          <div className="team-grid-wrapper">
+            {isOverflowing[team.name] && (
+              <button 
+                className="scroll-button left"
+                onClick={() => scrollTeam(team.name, 'left')}
+                aria-label="Scroll left"
+              >
+                ←
+              </button>
+            )}
+            <div
+              className="team-grid"
+              ref={el => { gridRefs.current[team.name] = el; }}
+            >
+              {(showAllCards[team.name] ? pokemonData[team.name] : bestTeams[team.name])?.map((pokemon) => (
+                <div key={pokemon.name} className="pokemon-card-tcg">
+                  <div className="tcg-header">
+                    <span className="tcg-basic">Básico</span>
+                    <span className="tcg-name">{pokemon.name}</span>
+                    <span className="tcg-ps">PS {pokemon.base_experience}</span>
+                    <span className="tcg-type" style={{ backgroundColor: typeBadgeColors[pokemon.types[0].type.name] }}>
+                      {pokemon.types[0].type.name[0].toUpperCase()}
+                    </span>
                   </div>
-                  <div className="tcg-attack">
-                    <span className="tcg-attack-cost">ATK</span>
-                    <span className="tcg-attack-name">Ataque</span>
-                    <span className="tcg-attack-damage">{pokemon.ivs.ataque}</span>
+                  <div className="tcg-image-container">
+                    <img 
+                      src={pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default} 
+                      alt={pokemon.name}
+                      className="tcg-image"
+                    />
                   </div>
-                  <div className="tcg-attack">
-                    <span className="tcg-attack-cost">DEF</span>
-                    <span className="tcg-attack-name">Defensa</span>
-                    <span className="tcg-attack-damage">{pokemon.ivs.defensa}</span>
+                  <div className="tcg-attacks">
+                    <div className="tcg-attack">
+                      <span className="tcg-attack-cost">HP</span>
+                      <span className="tcg-attack-name">Salud</span>
+                      <span className="tcg-attack-damage">{pokemon.ivs.salud}</span>
+                    </div>
+                    <div className="tcg-attack">
+                      <span className="tcg-attack-cost">ATK</span>
+                      <span className="tcg-attack-name">Ataque</span>
+                      <span className="tcg-attack-damage">{pokemon.ivs.ataque}</span>
+                    </div>
+                    <div className="tcg-attack">
+                      <span className="tcg-attack-cost">DEF</span>
+                      <span className="tcg-attack-name">Defensa</span>
+                      <span className="tcg-attack-damage">{pokemon.ivs.defensa}</span>
+                    </div>
+                  </div>
+                  <div className="tcg-footer">
+                    <span>IV Total: {calculateIVs(pokemon.ivs.salud, pokemon.ivs.ataque, pokemon.ivs.defensa).toFixed(1)}%</span>
+                    <span>Tipo: {pokemon.analyzerType}</span>
                   </div>
                 </div>
-                <div className="tcg-footer">
-                  <span>IV Total: {calculateIVs(pokemon.ivs.salud, pokemon.ivs.ataque, pokemon.ivs.defensa).toFixed(1)}%</span>
-                  <span>Tipo: {pokemon.analyzerType}</span>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            {isOverflowing[team.name] && (
+              <button 
+                className="scroll-button right"
+                onClick={() => scrollTeam(team.name, 'right')}
+                aria-label="Scroll right"
+              >
+                →
+              </button>
+            )}
           </div>
         </div>
       ))}

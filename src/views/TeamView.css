@@ -259,16 +259,13 @@
 
 .teams-container {
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .team-section {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 40px;
+  position: relative;
 }
 
 .team-header {
@@ -276,46 +273,74 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #eee;
+  padding: 0 20px;
 }
 
-.team-name {
-  color: #2c3e50;
+.team-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.team-grid-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.scroll-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
   font-size: 24px;
-  margin: 0;
-}
-
-.show-all-toggle {
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  transition: background-color 0.3s, opacity 0.3s;
+  opacity: 0.8;
 }
 
-.show-all-toggle label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  color: #666;
-  font-size: 14px;
+.scroll-button.left {
+  left: 0;
 }
 
-.show-all-toggle input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: #4DC3FF;
+.scroll-button.right {
+  right: 0;
+}
+
+.scroll-button:hover {
+  background: rgba(0, 0, 0, 0.85);
+  opacity: 1;
 }
 
 .team-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
   padding: 20px 0;
+  gap: 20px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  width: 100%;
+}
+
+.team-grid::-webkit-scrollbar {
+  display: none;
 }
 
 .pokemon-card-tcg {
+  flex: 0 0 auto;
+  width: 320px;
+  margin-right: 20px;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
