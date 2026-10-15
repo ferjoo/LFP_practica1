@@ -36,12 +36,16 @@ export function HomeView() {
     }
   }, [editorText]);
 
-  // Debounced live analysis for highlighting
+  // Debounced live analysis: keeps the highlighting and the token table in sync with the editor,
+  // so the default example shows its tokens as soon as the page loads.
   useDebouncedEffect(() => {
     let cancelled = false;
     analyzeCode(editorText).then(result => {
       if (!cancelled) {
         setLastStableHtml(highlightText(editorText, result.tokens));
+        setTokens(result.tokens);
+        setErrors(result.errors);
+        setAnalyzed(true);
       }
     });
     return () => { cancelled = true; };

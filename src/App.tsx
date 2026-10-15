@@ -9,7 +9,7 @@ type View = 'home' | 'errors' | 'team';
 
 function AppContent() {
   const [currentView, setCurrentView] = useState<View>('home');
-  const { clearEditor, resetToEmpty, setEditorText, editorText } = useApp();
+  const { clearEditor, setEditorText, editorText } = useApp();
 
   const handleHomeClick = () => {
     if (currentView === 'home') {
@@ -19,8 +19,9 @@ function AppContent() {
     }
   };
 
+  // Restores the sample team instead of leaving a blank editor, so the demo never looks empty.
   const handleClearEditor = () => {
-    resetToEmpty();
+    clearEditor();
     setCurrentView('home');
   };
 

@@ -149,11 +149,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [errors, setErrors] = useState<Token[]>([]);
   const [analyzed, setAnalyzed] = useState(false);
 
+  // Back to the sample team; the editor's live analysis refreshes tokens and errors from the text.
   const clearEditor = () => {
     setEditorText(initialText);
-    setTokens([]);
-    setErrors([]);
-    setAnalyzed(false);
   };
 
   const resetToEmpty = () => {
