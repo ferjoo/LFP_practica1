@@ -1,5 +1,4 @@
-import React from 'react';
-import type { Token } from '../../server/src/lexer';
+import type { Token } from '../lexer/lexer';
 
 interface TokenTableProps {
   tokens: Token[];

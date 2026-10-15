@@ -26,3 +26,12 @@ dist-ssr
 # Ignore server dependencies
 server/node_modules/
 server/package-lock.json
+
+# Secrets and local config
+.env*
+!.env.example
+.aws/
+*.pem
+*.key
+.npmrc.local
+.netrc

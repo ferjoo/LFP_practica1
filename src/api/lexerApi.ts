@@ -1,25 +1,10 @@
-import axios from 'axios';
+import { lexer } from '../lexer/lexer';
+import type { LexerResult } from '../lexer/lexer';
 
-const API_URL = 'http://localhost:3001/api';
+export type { Token, LexerResult } from '../lexer/lexer';
 
-export interface Token {
-  type: string;
-  lexeme: string;
-  row: number;
-  col: number;
-}
-
-export interface LexerResult {
-  tokens: Token[];
-  errors: Token[];
-}
-
+// Runs the lexer locally; same normalization the Express server applied.
 export async function analyzeCode(code: string): Promise<LexerResult> {
-  try {
-    const response = await axios.post(`${API_URL}/analyze`, { code });
-    return response.data;
-  } catch (error) {
-    console.error('Error analyzing code:', error);
-    throw error;
-  }
-} 
+  const normalizedCode = code.replace(/\\n/g, '\n');
+  return lexer(normalizedCode);
+}

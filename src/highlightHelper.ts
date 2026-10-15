@@ -1,4 +1,4 @@
-import type { Token } from './lexer';
+import type { Token } from './lexer/lexer';
 
 function getTokenColor(type: string) {
   switch (type) {

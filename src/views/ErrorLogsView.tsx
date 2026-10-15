@@ -1,4 +1,3 @@
-import React from 'react';
 import { TokenTable } from '../components/TokenTable';
 import { useApp } from '../context/AppContext';
 

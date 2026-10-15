@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { getPokemonInfo } from '../api/pokemonApi';
 import type { Pokemon } from '../api/pokemonApi';

@@ -1,54 +1,26 @@
-# React + TypeScript + Vite
+# Poke Team Builder — Analizador léxico (LFP)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Práctica 1 de Lenguajes Formales y de Programación (USAC, vacaciones de junio 2025).
 
-Currently, two official plugins are available:
+**Demo en vivo:** https://ferjoo.github.io/LFP_practica1/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Analizador léxico para un lenguaje propio (`.pklfp`) que describe equipos Pokémon por jugador. Escribe o carga un archivo en el editor y la aplicación:
 
-## Expanding the ESLint configuration
+- Resalta la sintaxis en tiempo real.
+- Genera la tabla de tokens y el reporte de errores léxicos.
+- Arma el equipo de cada jugador con datos y sprites de la [PokeAPI](https://pokeapi.co/).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Tecnologías
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+React 19, TypeScript y Vite. El analizador léxico corre completamente en el navegador (`src/lexer/lexer.ts`). La carpeta `server/` conserva la versión original en Express, donde el análisis se hacía en un backend.
+
+## Desarrollo local
+
+```bash
+pnpm install --frozen-lockfile
+pnpm dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Cada push a `master` publica el sitio en GitHub Pages mediante `.github/workflows/deploy.yml`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+Más detalle en `Manual Tecnico.pdf` y `Manual de Usuario.pdf`.
